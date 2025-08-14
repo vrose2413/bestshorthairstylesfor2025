@@ -1,0 +1,9 @@
+/* Remove underline and blue color for all links in the sidebar */
+.sidebar a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  text-decoration: underline; /* optional hover effect */
+}
