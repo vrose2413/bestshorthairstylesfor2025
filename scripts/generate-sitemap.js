@@ -2,42 +2,48 @@ const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
 
-const baseUrl = "https://bestshorthairstylesfor2025.pages.dev"; // ✅ Replace with your real URL
+const siteUrl = "https://bestshorthairstylesfor2025.pages.dev";
 const pagesDir = path.join(__dirname, "../pages");
+const postsDir = path.join(__dirname, "../posts");
 
 function generateSitemap() {
-  const pagePaths = glob.sync("**/*.js", {
-    cwd: pagesDir,
-    ignore: [
-      "_*.js",       // Ignore _app.js, _document.js
-      "**/[[]*[]].js", // Ignore dynamic routes like [slug].js
-      "api/**"       // Ignore API routes
-    ]
-  });
+  const staticPages = glob
+    .sync("**/*.js", {
+      cwd: pagesDir,
+      ignore: [
+        "_*.js", // Ignore _app.js, _document.js, etc.
+        "api/**",
+        "[*", // Ignore dynamic routes
+      ],
+    })
+    .map((page) => {
+      const route = page
+        .replace(".js", "")
+        .replace("/index", "");
+      return `${siteUrl}${route === "index" ? "" : `/${route}`}`;
+    });
 
-  const urls = pagePaths.map((file) => {
-    const route = file
-      .replace(/\.js$/, "")
-      .replace(/index$/, "")
-      .replace(/\\/g, "/");
+  const blogPosts = glob
+    .sync("**/*.md", { cwd: postsDir })
+    .map((file) => {
+      const slug = file.replace(/\.md$/, "");
+      return `${siteUrl}/blog/${slug}`;
+    });
 
-    return `${baseUrl}/${route}`;
-  });
+  const allUrls = [...staticPages, ...blogPosts];
 
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
-  ${urls
-    .map(
-      (url) => `
-  <url>
-    <loc>${url}</loc>
-  </url>`
-    )
-    .join("\n")}
-</urlset>`;
+${allUrls
+  .map((url) => {
+    return `<url><loc>${url}</loc></url>`;
+  })
+  .join("\n")}
+</urlset>
+`;
 
-  fs.writeFileSync(path.join(__dirname, "../out/sitemap.xml"), sitemap, "utf8");
-  console.log("✅ sitemap.xml generated!");
+  fs.writeFileSync(path.join(__dirname, "../public/sitemap.xml"), sitemapXml);
+  console.log("✅ Sitemap generated with", allUrls.length, "URLs.");
 }
 
 generateSitemap();
