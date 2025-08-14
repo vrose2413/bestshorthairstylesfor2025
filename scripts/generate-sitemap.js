@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
 
-const baseUrl = "https://bestnewshorthairstyles2025.pages.dev"; // ✅ Replace with your real URL
+const baseUrl = "https://bestshorthairstylesfor2025.pages.dev"; // ✅ Replace with your real URL
 const pagesDir = path.join(__dirname, "../pages");
 
 function generateSitemap() {
